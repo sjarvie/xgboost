@@ -16,8 +16,6 @@
 
 package ml.dmlc.xgboost4j.scala.example
 
-import java.util
-
 import scala.collection.mutable
 
 import ml.dmlc.xgboost4j.scala.{XGBoost, DMatrix}

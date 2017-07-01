@@ -19,7 +19,7 @@ package ml.dmlc.xgboost4j.scala.spark
 import java.nio.file.Files
 import java.util.concurrent.LinkedBlockingDeque
 
-import scala.collection.mutable.ListBuffer
+import scala.concurrent.duration.Duration
 import scala.io.Source
 import scala.util.Random
 
@@ -38,8 +38,8 @@ class XGBoostGeneralSuite extends SharedSparkContext with Utils {
     val rdd = sc.parallelize(
       (1 to numWorkers * vectorLength).toArray.map { _ => Random.nextFloat() }, numWorkers).cache()
 
-    val tracker = new RabitTracker(numWorkers)
-    tracker.start(0)
+    val tracker = new RabitTracker(numWorkers, Duration.Inf)
+    tracker.start()
     val trackerEnvs = tracker.getWorkerEnvs
     val collectedAllReduceResults = new LinkedBlockingDeque[Array[Float]]()
 
@@ -217,15 +217,9 @@ class XGBoostGeneralSuite extends SharedSparkContext with Utils {
           }
         }
       }
-      // create label
-      val label0 = new Array[Double](nrow)
-      for (i <- label0.indices) {
-        label0(i) = Random.nextDouble()
-      }
-      val points = new ListBuffer[LabeledPoint]
-      for (r <- 0 until nrow) {
-        points += LabeledPoint(label0(r), Vectors.dense(data0(r)))
-      }
+
+      val label0 = Array.tabulate[Double](nrow)(_ => Random.nextDouble())
+      val points = (0 until nrow).map { r => LabeledPoint(label0(r), Vectors.dense(data0(r))) }
       sc.parallelize(points)
     }
 
@@ -273,8 +267,7 @@ class XGBoostGeneralSuite extends SharedSparkContext with Utils {
 
   test("test prediction functionality with empty partition") {
     def buildEmptyRDD(sparkContext: Option[SparkContext] = None): RDD[SparkVector] = {
-      val sampleList = new ListBuffer[SparkVector]
-      sparkContext.getOrElse(sc).parallelize(sampleList, numWorkers)
+      sparkContext.getOrElse(sc).parallelize(List[SparkVector](), numWorkers)
     }
 
     val trainingRDD = buildTrainingRDD(sc)

@@ -16,6 +16,7 @@
 
 package ml.dmlc.xgboost4j.scala.spark
 
+import scala.concurrent.duration._
 import scala.collection.mutable
 
 import ml.dmlc.xgboost4j.java.{IRabitTracker, Rabit, XGBoostError, DMatrix => JDMatrix, RabitTracker => PyRabitTracker}
@@ -30,23 +31,48 @@ import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.Dataset
 import org.apache.spark.{SparkContext, TaskContext}
 
-object TrackerConf {
-  def apply(): TrackerConf = TrackerConf(0L, "python")
-}
+/** Rabit tracker configuration. */
+sealed trait TrackerConf
+
+/** Default Python-based tracker from dmlc_core. */
+case object PythonTracker extends TrackerConf
 
 /**
-  * Rabit tracker configurations.
-  * @param workerConnectionTimeout The timeout for all workers to connect to the tracker.
-  *                                Set timeout length to zero to disable timeout.
-  *                                Use a finite, non-zero timeout value to prevent tracker from
-  *                                hanging indefinitely (in milliseconds)
- *                                (supported by "scala" implementation only.)
-  * @param trackerImpl Choice between "python" or "scala". The former utilizes the Java wrapper of
-  *                    the Python Rabit tracker (in dmlc_core), whereas the latter is implemented
-  *                    in Scala without Python components, and with full support of timeouts.
-  *                    The Scala implementation is currently experimental, use at your own risk.
-  */
-case class TrackerConf(workerConnectionTimeout: Long, trackerImpl: String)
+ * Configuration for the experimental pure Scala tracker.
+ *
+ * @param workerConnectionTimeout The timeout for all workers to connect
+ *                                to the tracker.
+ */
+case class ScalaTracker(workerConnectionTimeout: Duration) extends TrackerConf
+
+object TrackerConf {
+  @deprecated("Use PythonTracker explicitly.")
+  def apply(): TrackerConf = PythonTracker
+
+  /**
+   * Rabit tracker configuration.
+   *
+   * @param workerConnectionTimeout The timeout for all workers to connect to the tracker.
+   *                                Set timeout length to zero to disable timeout.
+   *                                Use a finite, non-zero timeout value to prevent tracker from
+   *                                hanging indefinitely (in milliseconds)
+   *                                (supported by "scala" implementation only.)
+   * @param trackerImpl Choice between "python" or "scala". The former utilizes the Java wrapper of
+   *                    the Python Rabit tracker (in dmlc_core), whereas the latter is implemented
+   *                    in Scala without Python components, and with full support of timeouts.
+   *                    The Scala implementation is currently experimental, use at your own risk.
+   */
+  @deprecated("Use PythonTracker or ScalaTracker explicitly.")
+  def apply(workerConnectionTimeout: Int, trackerImpl: String): TrackerConf = {
+    trackerImpl match {
+      case "python" => PythonTracker
+      case "scala" => ScalaTracker(
+        if (workerConnectionTimeout <= 0) Duration.Inf else workerConnectionTimeout.millis)
+      case _ => throw new IllegalArgumentException(
+        "trackerImpl must be either \"python\" or \"scala\"")
+    }
+  }
+}
 
 object XGBoost extends Serializable {
   private val logger = LogFactory.getLog("XGBoostSpark")
@@ -235,13 +261,15 @@ object XGBoost extends Serializable {
   }
 
   private def startTracker(nWorkers: Int, trackerConf: TrackerConf): IRabitTracker = {
-    val tracker: IRabitTracker = trackerConf.trackerImpl match {
-      case "scala" => new RabitTracker(nWorkers)
-      case "python" => new PyRabitTracker(nWorkers)
-      case _ => new PyRabitTracker(nWorkers)
+    val tracker: IRabitTracker = trackerConf match {
+      case ScalaTracker(timeout) => new RabitTracker(nWorkers, timeout)
+      case PythonTracker => new PyRabitTracker(nWorkers)
     }
 
-    require(tracker.start(trackerConf.workerConnectionTimeout), "FAULT: Failed to start tracker")
+    if (!tracker.start()) {
+      sys.error("Failed to start tracker!")
+    }
+
     tracker
   }
 

@@ -16,6 +16,8 @@
 
 package ml.dmlc.xgboost4j.scala.spark
 
+import scala.concurrent.duration._
+
 import ml.dmlc.xgboost4j.java.{IRabitTracker, Rabit, RabitTracker => PyRabitTracker}
 import ml.dmlc.xgboost4j.scala.rabit.{RabitTracker => ScalaRabitTracker}
 import ml.dmlc.xgboost4j.java.IRabitTracker.TrackerStatus
@@ -41,7 +43,7 @@ class RabitTrackerRobustnessSuite extends FunSuite with Utils {
     val rdd = sparkContext.parallelize(1 to numWorkers, numWorkers).cache()
 
     val tracker = new PyRabitTracker(numWorkers)
-    tracker.start(0)
+    tracker.start()
     val trackerEnvs = tracker.getWorkerEnvs
 
     val workerCount: Int = numWorkers
@@ -101,8 +103,8 @@ class RabitTrackerRobustnessSuite extends FunSuite with Utils {
 
     val rdd = sparkContext.parallelize(1 to numWorkers, numWorkers).cache()
 
-    val tracker = new ScalaRabitTracker(numWorkers)
-    tracker.start(0)
+    val tracker = new ScalaRabitTracker(numWorkers, Duration.Inf)
+    tracker.start()
     val trackerEnvs = tracker.getWorkerEnvs
 
     val workerCount: Int = numWorkers
@@ -138,8 +140,8 @@ class RabitTrackerRobustnessSuite extends FunSuite with Utils {
 
     val rdd = sparkContext.parallelize(1 to numWorkers, numWorkers).cache()
 
-    val tracker = new ScalaRabitTracker(numWorkers)
-    tracker.start(500)
+    val tracker = new ScalaRabitTracker(numWorkers, 500.millis)
+    tracker.start()
     val trackerEnvs = tracker.getWorkerEnvs
 
     val dummyTasks = rdd.mapPartitions { iter =>

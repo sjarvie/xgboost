@@ -145,13 +145,7 @@ public class RabitTracker implements IRabitTracker {
     }
   }
 
-  public boolean start(long timeout) {
-    if (timeout > 0L) {
-      logger.warn("Python RabitTracker does not support timeout. " +
-              "The tracker will wait for all workers to connect indefinitely, unless " +
-              "it is interrupted manually. Use the Scala RabitTracker for timeout support.");
-    }
-
+  public boolean start() {
     if (startTrackerProcess()) {
       logger.debug("Tracker started, with env=" + envs.toString());
       System.out.println("Tracker started, with env=" + envs.toString());
