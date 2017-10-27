@@ -18,15 +18,15 @@ package ml.dmlc.xgboost4j.scala.example
 
 import scala.collection.mutable
 
-import ml.dmlc.xgboost4j.scala.{XGBoost, DMatrix}
+import ml.dmlc.xgboost4j.scala.{Classification, DMatrix, XGBoost}
 
 object ExternalMemory {
   def main(args: Array[String]): Unit = {
     // this is the only difference, add a # followed by a cache prefix name
     // several cache file with the prefix will be generated
     // currently only support convert from libsvm file
-    val trainMat = new DMatrix("../../demo/data/agaricus.txt.train#dtrain.cache")
-    val testMat = new DMatrix("../../demo/data/agaricus.txt.test#dtest.cache")
+    val trainMat = new DMatrix(Classification.trainFile + "#dtest.cache")
+    val testMat = new DMatrix(Classification.testFile + "#dtest.cache")
 
     val params = new mutable.HashMap[String, Any]()
     params += "eta" -> 1.0

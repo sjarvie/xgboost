@@ -15,6 +15,7 @@
  */
 package ml.dmlc.xgboost4j.scala.example.flink
 
+import ml.dmlc.xgboost4j.scala.Classification
 import ml.dmlc.xgboost4j.scala.flink.XGBoost
 import org.apache.flink.api.scala.{ExecutionEnvironment, _}
 import org.apache.flink.ml.MLUtils
@@ -24,8 +25,8 @@ object DistTrainWithFlink {
     val env: ExecutionEnvironment = ExecutionEnvironment.getExecutionEnvironment
     // read trainining data
     val trainData =
-      MLUtils.readLibSVM(env, "/path/to/data/agaricus.txt.train")
-    val testData = MLUtils.readLibSVM(env, "/path/to/data/agaricus.txt.test")
+      MLUtils.readLibSVM(env, Classification.trainFile.toString)
+    val testData = MLUtils.readLibSVM(env, Classification.testFile.toString)
     // define parameters
     val paramMap = List(
       "eta" -> 0.1,

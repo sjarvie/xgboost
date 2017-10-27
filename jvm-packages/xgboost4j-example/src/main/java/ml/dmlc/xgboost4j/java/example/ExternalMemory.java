@@ -15,12 +15,13 @@
  */
 package ml.dmlc.xgboost4j.java.example;
 
-import java.util.HashMap;
-
 import ml.dmlc.xgboost4j.java.Booster;
 import ml.dmlc.xgboost4j.java.DMatrix;
 import ml.dmlc.xgboost4j.java.XGBoost;
 import ml.dmlc.xgboost4j.java.XGBoostError;
+import ml.dmlc.xgboost4j.scala.Classification;
+
+import java.util.HashMap;
 
 /**
  * simple example for using external memory version
@@ -32,8 +33,8 @@ public class ExternalMemory {
     //this is the only difference, add a # followed by a cache prefix name
     //several cache file with the prefix will be generated
     //currently only support convert from libsvm file
-    DMatrix trainMat = new DMatrix("../demo/data/agaricus.txt.train#dtrain.cache");
-    DMatrix testMat = new DMatrix("../demo/data/agaricus.txt.test#dtest.cache");
+    DMatrix trainMat = new DMatrix(Classification.trainFile() + "#dtrain.cache");
+    DMatrix testMat = new DMatrix(Classification.testFile() + "#dtrain.cache");
 
     //specify parameters
     HashMap<String, Object> params = new HashMap<String, Object>();

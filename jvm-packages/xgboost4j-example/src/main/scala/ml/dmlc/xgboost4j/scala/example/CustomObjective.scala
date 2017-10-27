@@ -19,8 +19,8 @@ import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 
 import ml.dmlc.xgboost4j.java.XGBoostError
-import ml.dmlc.xgboost4j.scala.{XGBoost, DMatrix, EvalTrait, ObjectiveTrait}
-import org.apache.commons.logging.{LogFactory, Log}
+import ml.dmlc.xgboost4j.scala._
+import org.apache.commons.logging.{Log, LogFactory}
 
 /**
  * an example user define objective and eval
@@ -138,8 +138,8 @@ object CustomObjective {
   }
 
   def main(args: Array[String]): Unit = {
-    val trainMat = new DMatrix("../../demo/data/agaricus.txt.train")
-    val testMat = new DMatrix("../../demo/data/agaricus.txt.test")
+    val trainMat = new DMatrix(Classification.trainFile.toString)
+    val testMat = new DMatrix(Classification.testFile.toString)
     val params = new mutable.HashMap[String, Any]()
     params += "eta" -> 1.0
     params += "max_depth" -> 2

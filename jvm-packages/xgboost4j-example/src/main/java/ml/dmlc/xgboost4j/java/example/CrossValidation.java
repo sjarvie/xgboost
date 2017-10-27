@@ -15,12 +15,13 @@
  */
 package ml.dmlc.xgboost4j.java.example;
 
-import java.io.IOException;
-import java.util.HashMap;
-
 import ml.dmlc.xgboost4j.java.DMatrix;
 import ml.dmlc.xgboost4j.java.XGBoost;
 import ml.dmlc.xgboost4j.java.XGBoostError;
+import ml.dmlc.xgboost4j.scala.Classification;
+
+import java.io.IOException;
+import java.util.HashMap;
 
 /**
  * an example of cross validation
@@ -30,7 +31,7 @@ import ml.dmlc.xgboost4j.java.XGBoostError;
 public class CrossValidation {
   public static void main(String[] args) throws IOException, XGBoostError {
     //load train mat
-    DMatrix trainMat = new DMatrix("../../demo/data/agaricus.txt.train");
+    DMatrix trainMat = new DMatrix(Classification.trainFile().toString());
 
     //set params
     HashMap<String, Object> params = new HashMap<String, Object>();

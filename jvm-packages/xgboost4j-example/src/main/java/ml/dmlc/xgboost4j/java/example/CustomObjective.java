@@ -15,14 +15,14 @@
  */
 package ml.dmlc.xgboost4j.java.example;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-
+import ml.dmlc.xgboost4j.java.*;
+import ml.dmlc.xgboost4j.scala.Classification;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import ml.dmlc.xgboost4j.java.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 
 /**
  * an example user define objective and eval
@@ -139,9 +139,9 @@ public class CustomObjective {
 
   public static void main(String[] args) throws XGBoostError {
     //load train mat (svmlight format)
-    DMatrix trainMat = new DMatrix("../../demo/data/agaricus.txt.train");
+    DMatrix trainMat = new DMatrix(Classification.trainFile().toString());
     //load valid mat (svmlight format)
-    DMatrix testMat = new DMatrix("../../demo/data/agaricus.txt.test");
+    DMatrix testMat = new DMatrix(Classification.testFile().toString());
 
     HashMap<String, Object> params = new HashMap<String, Object>();
     params.put("eta", 1.0);

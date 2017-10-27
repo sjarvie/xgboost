@@ -15,19 +15,20 @@
  */
 package ml.dmlc.xgboost4j.java;
 
+import junit.framework.TestCase;
+import ml.dmlc.xgboost4j.scala.Classification$;
+import org.junit.Before;
+import org.junit.Test;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
-
-import junit.framework.TestCase;
-import org.junit.Test;
 
 /**
  * test cases for Booster
@@ -63,6 +64,15 @@ public class BoosterImplTest {
     }
   }
 
+  private DMatrix trainMat;
+  private DMatrix testMat;
+
+  @Before
+  public void setUp() throws XGBoostError {
+    trainMat = new DMatrix(Classification$.MODULE$.trainFile().toString());
+    testMat = new DMatrix(Classification$.MODULE$.testFile().toString());
+  }
+
   private Booster trainBooster(DMatrix trainMat, DMatrix testMat) throws XGBoostError {
     //set params
     Map<String, Object> paramMap = new HashMap<String, Object>() {
@@ -86,13 +96,8 @@ public class BoosterImplTest {
     //train a boost model
     return XGBoost.train(trainMat, paramMap, round, watches, null, null);
   }
-
   @Test
   public void testBoosterBasic() throws XGBoostError, IOException {
-
-    DMatrix trainMat = new DMatrix("../../demo/data/agaricus.txt.train");
-    DMatrix testMat = new DMatrix("../../demo/data/agaricus.txt.test");
-
     Booster booster = trainBooster(trainMat, testMat);
 
     //predict raw output
@@ -106,8 +111,6 @@ public class BoosterImplTest {
 
   @Test
   public void saveLoadModelWithPath() throws XGBoostError, IOException {
-    DMatrix trainMat = new DMatrix("../../demo/data/agaricus.txt.train");
-    DMatrix testMat = new DMatrix("../../demo/data/agaricus.txt.test");
     IEvaluation eval = new EvalError();
 
     Booster booster = trainBooster(trainMat, testMat);
@@ -124,12 +127,8 @@ public class BoosterImplTest {
 
   @Test
   public void saveLoadModelWithStream() throws XGBoostError, IOException {
-    DMatrix trainMat = new DMatrix("../../demo/data/agaricus.txt.train");
-    DMatrix testMat = new DMatrix("../../demo/data/agaricus.txt.test");
-
     Booster booster = trainBooster(trainMat, testMat);
 
-    Path tempDir = Files.createTempDirectory("boosterTest-");
     File tempFile = Files.createTempFile("", "").toFile();
     booster.saveModel(new FileOutputStream(tempFile));
     IEvaluation eval = new EvalError();
@@ -157,8 +156,6 @@ public class BoosterImplTest {
 
   @Test
   public void testBoosterEarlyStop() throws XGBoostError, IOException {
-    DMatrix trainMat = new DMatrix("../../demo/data/agaricus.txt.train");
-    DMatrix testMat = new DMatrix("../../demo/data/agaricus.txt.test");
     // testBoosterWithFastHistogram(trainMat, testMat);
     Map<String, Object> paramMap = new HashMap<String, Object>() {
       {
@@ -203,8 +200,6 @@ public class BoosterImplTest {
 
   @Test
   public void testFastHistoDepthWise() throws XGBoostError {
-    DMatrix trainMat = new DMatrix("../../demo/data/agaricus.txt.train");
-    DMatrix testMat = new DMatrix("../../demo/data/agaricus.txt.test");
     // testBoosterWithFastHistogram(trainMat, testMat);
     Map<String, Object> paramMap = new HashMap<String, Object>() {
       {
@@ -224,8 +219,6 @@ public class BoosterImplTest {
 
   @Test
   public void testFastHistoLossGuide() throws XGBoostError {
-    DMatrix trainMat = new DMatrix("../../demo/data/agaricus.txt.train");
-    DMatrix testMat = new DMatrix("../../demo/data/agaricus.txt.test");
     // testBoosterWithFastHistogram(trainMat, testMat);
     Map<String, Object> paramMap = new HashMap<String, Object>() {
       {
@@ -246,8 +239,6 @@ public class BoosterImplTest {
 
   @Test
   public void testFastHistoLossGuideMaxBin() throws XGBoostError {
-    DMatrix trainMat = new DMatrix("../../demo/data/agaricus.txt.train");
-    DMatrix testMat = new DMatrix("../../demo/data/agaricus.txt.test");
     // testBoosterWithFastHistogram(trainMat, testMat);
     Map<String, Object> paramMap = new HashMap<String, Object>() {
       {
@@ -268,9 +259,6 @@ public class BoosterImplTest {
 
   @Test
   public void testDumpModelJson() throws XGBoostError {
-    DMatrix trainMat = new DMatrix("../../demo/data/agaricus.txt.train");
-    DMatrix testMat = new DMatrix("../../demo/data/agaricus.txt.test");
-
     Booster booster = trainBooster(trainMat, testMat);
     String[] dump = booster.getModelDump("", false, "json");
     TestCase.assertEquals("  { \"nodeid\":", dump[0].substring(0, 13));
@@ -278,8 +266,6 @@ public class BoosterImplTest {
 
   @Test
   public void testFastHistoDepthwiseMaxDepth() throws XGBoostError {
-    DMatrix trainMat = new DMatrix("../../demo/data/agaricus.txt.train");
-    DMatrix testMat = new DMatrix("../../demo/data/agaricus.txt.test");
     // testBoosterWithFastHistogram(trainMat, testMat);
     Map<String, Object> paramMap = new HashMap<String, Object>() {
       {
@@ -299,8 +285,6 @@ public class BoosterImplTest {
 
   @Test
   public void testFastHistoDepthwiseMaxDepthMaxBin() throws XGBoostError {
-    DMatrix trainMat = new DMatrix("../../demo/data/agaricus.txt.train");
-    DMatrix testMat = new DMatrix("../../demo/data/agaricus.txt.test");
     // testBoosterWithFastHistogram(trainMat, testMat);
     Map<String, Object> paramMap = new HashMap<String, Object>() {
       {
@@ -326,9 +310,6 @@ public class BoosterImplTest {
    */
   @Test
   public void testCV() throws XGBoostError {
-    //load train mat
-    DMatrix trainMat = new DMatrix("../../demo/data/agaricus.txt.train");
-
     //set params
     Map<String, Object> param = new HashMap<String, Object>() {
       {

@@ -16,14 +16,12 @@
 
 package ml.dmlc.xgboost4j.scala.example
 
-import java.io.File
-import java.io.PrintWriter
+import java.io.{File, PrintWriter}
 
 import scala.collection.mutable
 
 import ml.dmlc.xgboost4j.java.{DMatrix => JDMatrix}
-import ml.dmlc.xgboost4j.java.example.util.DataLoader
-import ml.dmlc.xgboost4j.scala.{XGBoost, DMatrix}
+import ml.dmlc.xgboost4j.scala.{Classification, DMatrix, XGBoost}
 
 object BasicWalkThrough {
   def saveDumpModel(modelPath: String, modelInfos: Array[String]): Unit = {
@@ -36,8 +34,8 @@ object BasicWalkThrough {
   }
 
   def main(args: Array[String]): Unit = {
-    val trainMax = new DMatrix("../../demo/data/agaricus.txt.train")
-    val testMax = new DMatrix("../../demo/data/agaricus.txt.test")
+    val trainMax = new DMatrix(Classification.trainFile.toString)
+    val testMax = new DMatrix(Classification.testFile.toString)
 
     val params = new mutable.HashMap[String, Any]()
     params += "eta" -> 1.0
@@ -73,21 +71,6 @@ object BasicWalkThrough {
 
     // check predicts
     println(checkPredicts(predicts, predicts2))
-
-    // build dmatrix from CSR Sparse Matrix
-    println("start build dmatrix from csr sparse data ...")
-    val spData = DataLoader.loadSVMFile("../../demo/data/agaricus.txt.train")
-    val trainMax2 = new DMatrix(spData.rowHeaders, spData.colIndex, spData.data,
-      JDMatrix.SparseType.CSR)
-    trainMax2.setLabel(spData.labels)
-
-    // specify watchList
-    val watches2 = new mutable.HashMap[String, DMatrix]
-    watches2 += "train" -> trainMax2
-    watches2 += "test" -> testMax2
-    val booster3 = XGBoost.train(trainMax2, params.toMap, round, watches2.toMap)
-    val predicts3 = booster3.predict(testMax2)
-    println(checkPredicts(predicts, predicts3))
   }
 
   def checkPredicts(fPredicts: Array[Array[Float]], sPredicts: Array[Array[Float]]): Boolean = {

@@ -25,7 +25,18 @@
     <dependencies>
         <dependency>
             <groupId>ml.dmlc</groupId>
+            <artifactId>xgboost4j</artifactId>
+            <version>0.7</version>
+            <type>test-jar</type>
+        </dependency>
+        <dependency>
+            <groupId>ml.dmlc</groupId>
             <artifactId>xgboost4j-spark</artifactId>
+            <version>0.7</version>
+        </dependency>
+        <dependency>
+            <groupId>ml.dmlc</groupId>
+            <artifactId>xgboost4j-flink</artifactId>
             <version>0.7</version>
         </dependency>
         <dependency>
@@ -33,11 +44,6 @@
             <artifactId>spark-mllib_${scala.binary.version}</artifactId>
             <version>${spark.version}</version>
             <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>ml.dmlc</groupId>
-            <artifactId>xgboost4j-flink</artifactId>
-            <version>0.7</version>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
