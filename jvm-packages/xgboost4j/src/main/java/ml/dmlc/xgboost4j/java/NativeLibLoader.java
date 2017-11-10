@@ -15,11 +15,11 @@
  */
 package ml.dmlc.xgboost4j.java;
 
-import java.io.*;
-import java.lang.reflect.Field;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import java.io.*;
+import java.lang.reflect.Field;
 
 /**
  * class to load native library
@@ -34,13 +34,18 @@ class NativeLibLoader {
   private static final String nativeResourcePath = "/lib/";
   private static final String[] libNames = new String[]{"xgboost4j"};
 
-  static synchronized void initXGBoost() throws IOException {
-    if (!initialized) {
-      for (String libName : libNames) {
-        smartLoad(libName);
+  static synchronized void ensureLoaded() {
+    try {
+      if (!initialized) {
+        for (String libName : libNames) {
+          smartLoad(libName);
+        }
       }
-      initialized = true;
+    } catch (IOException e) {
+      throw new RuntimeException(e);
     }
+
+    initialized = true;
   }
 
   /**
