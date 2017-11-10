@@ -23,7 +23,7 @@ import scala.util.Random
 
 import ml.dmlc.xgboost4j.java.Rabit
 import ml.dmlc.xgboost4j.scala.{Classification, DMatrix, MultiClassification, Ranking}
-import ml.dmlc.xgboost4j.scala.rabit.RabitTracker
+import ml.dmlc.xgboost4j.scala.rabit.AkkaRabitTracker
 
 import org.apache.spark.SparkContext
 import org.apache.spark.ml.feature.{LabeledPoint => MLLabeledPoint}
@@ -37,7 +37,7 @@ class XGBoostGeneralSuite extends FunSuite with PerTest {
     val rdd = sc.parallelize(
       (1 to numWorkers * vectorLength).toArray.map { _ => Random.nextFloat() }, numWorkers).cache()
 
-    val tracker = new RabitTracker(numWorkers)
+    val tracker = new AkkaRabitTracker(numWorkers)
     tracker.start(0)
     val trackerEnvs = tracker.getWorkerEnvs
     val collectedAllReduceResults = new LinkedBlockingDeque[Array[Float]]()

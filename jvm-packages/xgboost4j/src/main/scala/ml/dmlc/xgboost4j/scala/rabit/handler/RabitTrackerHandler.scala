@@ -114,10 +114,10 @@ private[scala] class RabitTrackerHandler(numWorkers: Int)
   }
 
   /**
-    * Handles external tracker control messages sent by RabitTracker (usually in ask patterns)
+    * Handles external tracker control messages sent by PyRabitTracker (usually in ask patterns)
     * to interact with the tracker interface.
     *
-    * @param trackerMsg control messages sent by RabitTracker class.
+    * @param trackerMsg control messages sent by PyRabitTracker class.
     */
   private def handleTrackerControlMessage(trackerMsg: TrackerControlMessage): Unit =
     trackerMsg match {
@@ -343,7 +343,7 @@ private[rabit] class WorkerDependencyResolver(handler: ActorRef) extends Actor w
 }
 
 private[scala] object RabitTrackerHandler {
-  // Messages sent by RabitTracker to this RabitTrackerHandler actor
+  // Messages sent by PyRabitTracker to this RabitTrackerHandler actor
   trait TrackerControlMessage
   case object RequestCompletionFuture extends TrackerControlMessage
   case object RequestBoundFuture extends TrackerControlMessage

@@ -19,8 +19,8 @@ package ml.dmlc.xgboost4j.scala.spark
 import scala.collection.mutable
 import scala.util.Random
 
-import ml.dmlc.xgboost4j.java.{IRabitTracker, Rabit, XGBoostError, RabitTracker => PyRabitTracker}
-import ml.dmlc.xgboost4j.scala.rabit.RabitTracker
+import ml.dmlc.xgboost4j.java.{IRabitTracker, PyRabitTracker, Rabit, XGBoostError}
+import ml.dmlc.xgboost4j.scala.rabit.AkkaRabitTracker
 import ml.dmlc.xgboost4j.scala.{XGBoost => SXGBoost, _}
 import ml.dmlc.xgboost4j.{LabeledPoint => XGBLabeledPoint}
 import org.apache.commons.logging.LogFactory
@@ -249,7 +249,7 @@ object XGBoost extends Serializable {
 
   private def startTracker(nWorkers: Int, trackerConf: TrackerConf): IRabitTracker = {
     val tracker: IRabitTracker = trackerConf.trackerImpl match {
-      case "scala" => new RabitTracker(nWorkers)
+      case "scala" => new AkkaRabitTracker(nWorkers)
       case "python" => new PyRabitTracker(nWorkers)
       case _ => new PyRabitTracker(nWorkers)
     }

@@ -19,9 +19,8 @@ package ml.dmlc.xgboost4j.scala.flink
 import scala.collection.JavaConverters.asScalaIteratorConverter
 
 import ml.dmlc.xgboost4j.LabeledPoint
-import ml.dmlc.xgboost4j.java.{Rabit, RabitTracker}
+import ml.dmlc.xgboost4j.java.{PyRabitTracker, Rabit}
 import ml.dmlc.xgboost4j.scala.{DMatrix, XGBoost => XGBoostScala}
-
 import org.apache.commons.logging.LogFactory
 import org.apache.flink.api.common.functions.RichMapPartitionFunction
 import org.apache.flink.api.scala.{DataSet, _}
@@ -86,7 +85,7 @@ object XGBoost {
     */
   def train(dtrain: DataSet[LabeledVector], params: Map[String, Any], round: Int):
       XGBoostModel = {
-    val tracker = new RabitTracker(dtrain.getExecutionEnvironment.getParallelism)
+    val tracker = new PyRabitTracker(dtrain.getExecutionEnvironment.getParallelism)
     if (tracker.start(0L)) {
       dtrain
         .mapPartition(new MapFunction(params, round, tracker.getWorkerEnvs))

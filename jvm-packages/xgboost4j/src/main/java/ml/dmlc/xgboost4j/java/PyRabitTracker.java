@@ -1,15 +1,15 @@
 package ml.dmlc.xgboost4j.java;
 
-
-
-import java.io.*;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Java implementation of the Rabit tracker to coordinate distributed workers.
@@ -17,14 +17,14 @@ import org.apache.commons.logging.LogFactory;
  * start() and waitFor() methods (i.e., the timeout is infinite.)
  *
  * For systems lacking Python environment, or for timeout functionality, consider using the Scala
- * Rabit tracker (ml.dmlc.xgboost4j.scala.rabit.RabitTracker) which does not depend on Python, and
+ * Rabit tracker (ml.dmlc.xgboost4j.scala.rabit.AkkaRabitTracker) which does not depend on Python, and
  * provides timeout support.
  *
  * The tracker must be started on driver node before running distributed jobs.
  */
-public class RabitTracker implements IRabitTracker {
+public class PyRabitTracker implements IRabitTracker {
   // Maybe per tracker logger?
-  private static final Log logger = LogFactory.getLog(RabitTracker.class);
+  private static final Log logger = LogFactory.getLog(PyRabitTracker.class);
   // tracker python file.
   private static String tracker_py = null;
   // environment variable to be pased.
@@ -62,9 +62,9 @@ public class RabitTracker implements IRabitTracker {
       } catch (IOException ex) {
         trackerProcessLogger.error(ex.toString());
       } catch (InterruptedException ie) {
-        // we should not get here as RabitTracker is accessed in the main thread
+        // we should not get here as PyRabitTracker is accessed in the main thread
         ie.printStackTrace();
-        logger.error("the RabitTracker thread is terminated unexpectedly");
+        logger.error("the PyRabitTracker thread is terminated unexpectedly");
       }
     }
   }
@@ -78,7 +78,7 @@ public class RabitTracker implements IRabitTracker {
     }
   }
 
-  public RabitTracker(int numWorkers)
+  public PyRabitTracker(int numWorkers)
     throws XGBoostError {
     if (numWorkers < 1) {
       throw new XGBoostError("numWorkers must be greater equal to one");
@@ -147,9 +147,9 @@ public class RabitTracker implements IRabitTracker {
 
   public boolean start(long timeout) {
     if (timeout > 0L) {
-      logger.warn("Python RabitTracker does not support timeout. " +
+      logger.warn("Python PyRabitTracker does not support timeout. " +
               "The tracker will wait for all workers to connect indefinitely, unless " +
-              "it is interrupted manually. Use the Scala RabitTracker for timeout support.");
+              "it is interrupted manually. Use the Scala PyRabitTracker for timeout support.");
     }
 
     if (startTrackerProcess()) {
@@ -169,10 +169,10 @@ public class RabitTracker implements IRabitTracker {
 
   public int waitFor(long timeout) {
     if (timeout > 0L) {
-      logger.warn("Python RabitTracker does not support timeout. " +
+      logger.warn("Python PyRabitTracker does not support timeout. " +
               "The tracker will wait for either all workers to finish tasks and send " +
               "shutdown signal, or manual interruptions. " +
-              "Use the Scala RabitTracker for timeout support.");
+              "Use the Scala PyRabitTracker for timeout support.");
     }
 
     try {
@@ -182,9 +182,9 @@ public class RabitTracker implements IRabitTracker {
       stop();
       return returnVal;
     } catch (InterruptedException e) {
-      // we should not get here as RabitTracker is accessed in the main thread
+      // we should not get here as PyRabitTracker is accessed in the main thread
       e.printStackTrace();
-      logger.error("the RabitTracker thread is terminated unexpectedly");
+      logger.error("the PyRabitTracker thread is terminated unexpectedly");
       return TrackerStatus.INTERRUPTED.getStatusCode();
     }
   }

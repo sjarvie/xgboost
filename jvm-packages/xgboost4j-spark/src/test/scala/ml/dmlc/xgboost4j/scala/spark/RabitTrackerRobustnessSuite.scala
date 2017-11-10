@@ -16,15 +16,14 @@
 
 package ml.dmlc.xgboost4j.scala.spark
 
-import ml.dmlc.xgboost4j.java.{IRabitTracker, Rabit, RabitTracker => PyRabitTracker}
-import ml.dmlc.xgboost4j.scala.rabit.{RabitTracker => ScalaRabitTracker}
 import ml.dmlc.xgboost4j.java.IRabitTracker.TrackerStatus
-import org.apache.spark.{SparkConf, SparkContext}
+import ml.dmlc.xgboost4j.java.{PyRabitTracker, Rabit}
+import ml.dmlc.xgboost4j.scala.rabit.{AkkaRabitTracker => ScalaRabitTracker}
 import org.scalatest.FunSuite
 
 
 class RabitTrackerRobustnessSuite extends FunSuite with PerTest {
-  test("test Java RabitTracker wrapper's exception handling: it should not hang forever.") {
+  test("test Java PyRabitTracker wrapper's exception handling: it should not hang forever.") {
     /*
       Deliberately create new instances of SparkContext in each unit test to avoid reusing the
       same thread pool spawned by the local mode of Spark. As these tests simulate worker crashes
@@ -46,7 +45,7 @@ class RabitTrackerRobustnessSuite extends FunSuite with PerTest {
        thrown: the thread running the dummy spark job (sparkThread) catches the exception and
        delegates it to the UnCaughtExceptionHandler, which is the Rabit tracker itself.
 
-       The Java RabitTracker class reacts to exceptions by killing the spawned process running
+       The Java PyRabitTracker class reacts to exceptions by killing the spawned process running
        the Python tracker. If at least one Rabit worker has yet connected to the tracker before
        it is killed, the resulted connection failure will trigger the Rabit worker to call
        "exit(-1);" in the native C++ code, effectively ending the dummy Spark task.
@@ -60,7 +59,7 @@ class RabitTrackerRobustnessSuite extends FunSuite with PerTest {
 
        To prevent unit tests from crashing, deterministic delays were introduced to make sure that
        the exception is thrown at last, ideally after all worker connections have been established.
-       For the same reason, the Java RabitTracker class delays the killing of the Python tracker
+       For the same reason, the Java PyRabitTracker class delays the killing of the Python tracker
        process to ensure that pending worker connections are handled.
      */
     val dummyTasks = rdd.mapPartitions { iter =>
@@ -87,7 +86,7 @@ class RabitTrackerRobustnessSuite extends FunSuite with PerTest {
     assert(tracker.waitFor(0) != 0)
   }
 
-  test("test Scala RabitTracker's exception handling: it should not hang forever.") {
+  test("test Scala PyRabitTracker's exception handling: it should not hang forever.") {
     val rdd = sc.parallelize(1 to numWorkers, numWorkers).cache()
 
     val tracker = new ScalaRabitTracker(numWorkers)
@@ -118,7 +117,7 @@ class RabitTrackerRobustnessSuite extends FunSuite with PerTest {
     assert(tracker.waitFor(0L) == TrackerStatus.FAILURE.getStatusCode)
   }
 
-  test("test Scala RabitTracker's workerConnectionTimeout") {
+  test("test Scala PyRabitTracker's workerConnectionTimeout") {
     val rdd = sc.parallelize(1 to numWorkers, numWorkers).cache()
 
     val tracker = new ScalaRabitTracker(numWorkers)

@@ -39,7 +39,7 @@ import scala.util.{Failure, Success, Try}
   * {{{
   *   import scala.concurrent.duration._
   *
-  *   val tracker = new RabitTracker(32)
+  *   val tracker = new PyRabitTracker(32)
   *   // allow up to 10 minutes for all workers to connect to the tracker.
   *   tracker.start(10 minutes)
   *
@@ -60,15 +60,16 @@ import scala.util.{Failure, Success, Try}
   * @param maxPortTrials The maximum number of trials of socket binding, by sequentially
   *                      increasing the port number.
   */
-private[scala] class RabitTracker(numWorkers: Int, port: Option[Int] = None,
-                                  maxPortTrials: Int = 1000)
-  extends IRabitTracker {
+private[scala] class AkkaRabitTracker(
+    numWorkers: Int,
+    port: Option[Int] = None,
+    maxPortTrials: Int = 1000) extends IRabitTracker {
 
   import scala.collection.JavaConverters._
 
   require(numWorkers >=1, "numWorkers must be greater than or equal to one (1).")
 
-  val system = ActorSystem.create("RabitTracker")
+  val system = ActorSystem.create("PyRabitTracker")
   val handler = system.actorOf(RabitTrackerHandler.props(numWorkers), "Handler")
   implicit val askTimeout: akka.util.Timeout = akka.util.Timeout(30 seconds)
   private[this] val tcpBindingTimeout: Duration = 1 minute
