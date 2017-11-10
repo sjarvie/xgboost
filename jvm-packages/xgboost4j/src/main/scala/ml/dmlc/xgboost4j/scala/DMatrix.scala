@@ -17,8 +17,9 @@
 package ml.dmlc.xgboost4j.scala
 
 import _root_.scala.collection.JavaConverters._
+
 import ml.dmlc.xgboost4j.LabeledPoint
-import ml.dmlc.xgboost4j.java.{DMatrix => JDMatrix, DataBatch, XGBoostError}
+import ml.dmlc.xgboost4j.java.{XGBoostError, DMatrix => JDMatrix}
 
 class DMatrix private[scala](private[scala] val jDMatrix: JDMatrix) {
   /**
@@ -40,20 +41,6 @@ class DMatrix private[scala](private[scala] val jDMatrix: JDMatrix) {
     */
   def this(dataIter: Iterator[LabeledPoint], cacheInfo: String = null) {
     this(new JDMatrix(dataIter.asJava, cacheInfo))
-  }
-
-  /**
-   * create DMatrix from sparse matrix
-   *
-   * @param headers index to headers (rowHeaders for CSR or colHeaders for CSC)
-   * @param indices Indices (colIndexs for CSR or rowIndexs for CSC)
-   * @param data    non zero values (sequence by row for CSR or by col for CSC)
-   * @param st      sparse matrix type (CSR or CSC)
-   */
-  @throws(classOf[XGBoostError])
-  @deprecated
-  def this(headers: Array[Long], indices: Array[Int], data: Array[Float], st: JDMatrix.SparseType) {
-    this(new JDMatrix(headers, indices, data, st))
   }
 
   /**

@@ -15,9 +15,9 @@
  */
 package ml.dmlc.xgboost4j.java;
 
-import java.util.Iterator;
-
 import ml.dmlc.xgboost4j.LabeledPoint;
+
+import java.util.Iterator;
 
 /**
  * DMatrix for xgboost.
@@ -66,27 +66,6 @@ public class DMatrix {
     }
     long[] out = new long[1];
     XGBoostJNI.checkCall(XGBoostJNI.XGDMatrixCreateFromFile(dataPath, 1, out));
-    handle = out[0];
-  }
-
-  /**
-   * Create DMatrix from Sparse matrix in CSR/CSC format.
-   * @param headers The row index of the matrix.
-   * @param indices The indices of presenting entries.
-   * @param data The data content.
-   * @param st  Type of sparsity.
-   * @throws XGBoostError
-   */
-  @Deprecated
-  public DMatrix(long[] headers, int[] indices, float[] data, SparseType st) throws XGBoostError {
-    long[] out = new long[1];
-    if (st == SparseType.CSR) {
-      XGBoostJNI.checkCall(XGBoostJNI.XGDMatrixCreateFromCSREx(headers, indices, data, 0, out));
-    } else if (st == SparseType.CSC) {
-      XGBoostJNI.checkCall(XGBoostJNI.XGDMatrixCreateFromCSCEx(headers, indices, data, 0, out));
-    } else {
-      throw new UnknownError("unknow sparsetype");
-    }
     handle = out[0];
   }
 
