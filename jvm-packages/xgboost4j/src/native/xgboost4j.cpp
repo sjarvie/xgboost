@@ -327,25 +327,6 @@ JNIEXPORT jint JNICALL Java_ml_dmlc_xgboost4j_java_XGBoostJNI_XGDMatrixSetFloatI
 
 /*
  * Class:     ml_dmlc_xgboost4j_java_XGBoostJNI
- * Method:    XGDMatrixSetUIntInfo
- * Signature: (JLjava/lang/String;[I)V
- */
-JNIEXPORT jint JNICALL Java_ml_dmlc_xgboost4j_java_XGBoostJNI_XGDMatrixSetUIntInfo
-  (JNIEnv *jenv, jclass jcls, jlong jhandle, jstring jfield, jintArray jarray) {
-  DMatrixHandle handle = (DMatrixHandle) jhandle;
-  const char*  field = jenv->GetStringUTFChars(jfield, 0);
-  jint* array = jenv->GetIntArrayElements(jarray, NULL);
-  bst_ulong len = (bst_ulong)jenv->GetArrayLength(jarray);
-  int ret = XGDMatrixSetUIntInfo(handle, (char const *)field, (unsigned int const *)array, len);
-  //release
-  if (field) jenv->ReleaseStringUTFChars(jfield, (const char *)field);
-  jenv->ReleaseIntArrayElements(jarray, array, 0);
-
-  return ret;
-}
-
-/*
- * Class:     ml_dmlc_xgboost4j_java_XGBoostJNI
  * Method:    XGDMatrixSetGroup
  * Signature: (J[I)V
  */
@@ -379,27 +360,6 @@ JNIEXPORT jint JNICALL Java_ml_dmlc_xgboost4j_java_XGBoostJNI_XGDMatrixGetFloatI
   jenv->SetFloatArrayRegion(jarray, 0, jlen, (jfloat *) result);
   jenv->SetObjectArrayElement(jout, 0, (jobject) jarray);
 
-  return ret;
-}
-
-/*
- * Class:     ml_dmlc_xgboost4j_java_XGBoostJNI
- * Method:    XGDMatrixGetUIntInfo
- * Signature: (JLjava/lang/String;)[I
- */
-JNIEXPORT jint JNICALL Java_ml_dmlc_xgboost4j_java_XGBoostJNI_XGDMatrixGetUIntInfo
-  (JNIEnv *jenv, jclass jcls, jlong jhandle, jstring jfield, jobjectArray jout) {
-  DMatrixHandle handle = (DMatrixHandle) jhandle;
-  const char*  field = jenv->GetStringUTFChars(jfield, 0);
-  bst_ulong len;
-  unsigned int *result;
-  int ret = (jint) XGDMatrixGetUIntInfo(handle, field, &len, (const unsigned int **) &result);
-  if (field) jenv->ReleaseStringUTFChars(jfield, field);
-
-  jsize jlen = (jsize) len;
-  jintArray jarray = jenv->NewIntArray(jlen);
-  jenv->SetIntArrayRegion(jarray, 0, jlen, (jint *) result);
-  jenv->SetObjectArrayElement(jout, 0, jarray);
   return ret;
 }
 

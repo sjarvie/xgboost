@@ -188,12 +188,6 @@ public class DMatrix {
     return infos[0];
   }
 
-  private int[] getIntInfo(String field) throws XGBoostError {
-    int[][] infos = new int[1][];
-    XGBoostJNI.checkCall(XGBoostJNI.XGDMatrixGetUIntInfo(handle, field, infos));
-    return infos[0];
-  }
-
   /**
    * get label values
    *

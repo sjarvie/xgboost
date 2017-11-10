@@ -15,10 +15,10 @@
  */
 package ml.dmlc.xgboost4j.java;
 
-import java.nio.ByteBuffer;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+
+import java.nio.ByteBuffer;
 
 /**
  * xgboost JNI functions
@@ -73,13 +73,9 @@ class XGBoostJNI {
 
   public final static native int XGDMatrixSetFloatInfo(long handle, String field, float[] array);
 
-  public final static native int XGDMatrixSetUIntInfo(long handle, String field, int[] array);
-
   public final static native int XGDMatrixSetGroup(long handle, int[] group);
 
   public final static native int XGDMatrixGetFloatInfo(long handle, String field, float[][] info);
-
-  public final static native int XGDMatrixGetUIntInfo(long handle, String filed, int[][] info);
 
   public final static native int XGDMatrixNumRow(long handle, long[] row);
 
