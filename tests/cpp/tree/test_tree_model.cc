@@ -5,6 +5,31 @@
 #include "dmlc/filesystem.h"
 
 namespace xgboost {
+
+TEST(Tree, FloatToString) {
+  float x = 1.0f;
+  float y = std::nextafterf(x, std::numeric_limits<float>::max());
+  float z = std::nextafterf(y, std::numeric_limits<float>::max());
+
+  float y_after = std::stof(detail::ToStr(y));
+  float z_after = std::stof(detail::ToStr(z));
+
+  EXPECT_EQ(y_after, y);
+  EXPECT_EQ(z_after, z);
+}
+
+TEST(Tree, DoubleToString) {
+  double x = 1.0;
+  double y = std::nextafter(x, std::numeric_limits<double>::max());
+  double z = std::nextafter(y, std::numeric_limits<double>::max());
+
+  double y_after = std::stod(detail::ToStr(y));
+  double z_after = std::stod(detail::ToStr(z));
+
+  EXPECT_EQ(y_after, y);
+  EXPECT_EQ(z_after, z);
+}
+
 // Manually construct tree in binary format
 // Do not use structs in case they change
 // We want to preserve backwards compatibility

@@ -606,5 +606,21 @@ inline int RegTree::GetNext(int pid, bst_float fvalue, bool is_unknown) const {
     }
   }
 }
+
+namespace detail {
+  template <typename Float>
+  static std::string ToStr(Float value) {
+    static_assert(std::is_floating_point<Float>::value,
+      "Use std::to_string instead for non-floating point values.");
+
+    static int32_t constexpr kFloatMaxPrecision =
+      std::numeric_limits<bst_float>::max_digits10;
+
+    std::stringstream ss;
+    ss << std::setprecision(kFloatMaxPrecision) << value;
+    return ss.str();
+  }
+}
+
 }  // namespace xgboost
 #endif  // XGBOOST_TREE_MODEL_H_
