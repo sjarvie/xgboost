@@ -36,6 +36,8 @@ class Booster {
     return learner_.get();
   }
 
+  // TODO: Add SetCache
+
   inline void SetParam(const std::string& name, const std::string& val) {
     auto it = std::find_if(cfg_.begin(), cfg_.end(),
       [&name, &val](decltype(*cfg_.begin()) &x) {

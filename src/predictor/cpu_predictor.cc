@@ -116,6 +116,10 @@ class CPUPredictor : public Predictor {
                     out_preds->HostVector().begin());
           return true;
         }
+      } else {
+        if (cache_.empty()) {
+          LOG(WARNING) << "Cache is missing. Performance will degrade" << std::endl;
+        }
       }
     }
     return false;
@@ -175,6 +179,10 @@ class CPUPredictor : public Predictor {
       std::vector<std::unique_ptr<TreeUpdater>>* updaters,
       int num_new_trees) override {
     int old_ntree = model.trees.size() - num_new_trees;
+    // TODO: Check old_ntree >= 0
+    if (cache_.empty()) {
+      LOG(WARNING) << "Cache is empty: nothing to update" << std::endl;
+    }
     // update cache entry
     for (auto& kv : cache_) {
       PredictionCacheEntry& e = kv.second;
