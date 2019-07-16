@@ -21,7 +21,6 @@ import java.nio.file.Files
 
 import scala.collection.{AbstractIterator, mutable}
 import scala.util.Random
-
 import ml.dmlc.xgboost4j.java.{IRabitTracker, Rabit, XGBoostError, RabitTracker => PyRabitTracker}
 import ml.dmlc.xgboost4j.scala.rabit.RabitTracker
 import ml.dmlc.xgboost4j.scala.spark.params.LearningTaskParams
@@ -29,7 +28,6 @@ import ml.dmlc.xgboost4j.scala.{XGBoost => SXGBoost, _}
 import ml.dmlc.xgboost4j.{LabeledPoint => XGBLabeledPoint}
 import org.apache.commons.io.FileUtils
 import org.apache.commons.logging.LogFactory
-
 import org.apache.spark.rdd.RDD
 import org.apache.spark.{SparkContext, SparkParallelismTracker, TaskContext}
 import org.apache.spark.sql.SparkSession
@@ -141,7 +139,9 @@ object XGBoost extends Serializable {
       round: Int,
       obj: ObjectiveTrait,
       eval: EvalTrait,
-      prevBooster: Booster): Iterator[(Booster, Map[String, Array[Float]])] = {
+      serializedPrevBooster: SerializedBooster): Iterator[(Booster, Map[String, Array[Float]])] = {
+
+    // TODO: Ensure it runs in the executor environment
 
     // to workaround the empty partitions in training dataset,
     // this might not be the best efficient implementation, see
@@ -156,6 +156,15 @@ object XGBoost extends Serializable {
     Rabit.init(rabitEnv)
 
     try {
+      // Create a prev booster
+      val prevBooster = if (serializedPrevBooster == null) {
+        null
+      } else {
+        val allMats = watches.toMap.values.toArray
+
+        SXGBoost.loadModel(serializedPrevBooster.bytes, allMats, serializedPrevBooster.version)
+      }
+
       val numEarlyStoppingRounds = params.get("num_early_stopping_rounds")
         .map(_.toString.toInt).getOrElse(0)
       val overridedParams = if (numEarlyStoppingRounds > 0 &&
@@ -335,7 +344,7 @@ object XGBoost extends Serializable {
       params: Map[String, Any],
       rabitEnv: java.util.Map[String, String],
       checkpointRound: Int,
-      prevBooster: Booster,
+      prevBooster: SerializedBooster,
       evalSetsMap: Map[String, RDD[XGBLabeledPoint]]): RDD[(Booster, Map[String, Array[Float]])] = {
     val (nWorkers, _, useExternalMemory, obj, eval, missing, _, _, _, _) =
       parameterFetchAndValidation(params, trainingData.sparkContext)
@@ -365,7 +374,7 @@ object XGBoost extends Serializable {
       params: Map[String, Any],
       rabitEnv: java.util.Map[String, String],
       checkpointRound: Int,
-      prevBooster: Booster,
+      prevBooster: SerializedBooster,
       evalSetsMap: Map[String, RDD[XGBLabeledPoint]]): RDD[(Booster, Map[String, Array[Float]])] = {
     val (nWorkers, _, useExternalMemory, obj, eval, missing, _, _, _, _) =
       parameterFetchAndValidation(params, trainingData.sparkContext)
@@ -428,7 +437,7 @@ object XGBoost extends Serializable {
     checkpointManager.cleanUpHigherVersions(round.asInstanceOf[Int])
     val transformedTrainingData = composeInputData(trainingData,
       params.getOrElse("cacheTrainingSet", false).asInstanceOf[Boolean], hasGroup, nWorkers)
-    var prevBooster = checkpointManager.loadCheckpointAsBooster
+    var serializedPrevBooster = checkpointManager.loadCheckpointAsSerializedBooster
     try {
       // Train for every ${savingRound} rounds and save the partially completed booster
       checkpointManager.getCheckpointRounds(checkpointInterval, round).map {
@@ -441,11 +450,11 @@ object XGBoost extends Serializable {
             val rabitEnv = tracker.getWorkerEnvs
             val boostersAndMetrics = if (hasGroup) {
               trainForRanking(transformedTrainingData.left.get, overriddenParams, rabitEnv,
-                checkpointRound, prevBooster, evalSetsMap)
+                checkpointRound, serializedPrevBooster, evalSetsMap)
             } else {
               trainForNonRanking(transformedTrainingData.right.get, overriddenParams, rabitEnv,
-                checkpointRound, prevBooster, evalSetsMap)
-            }
+                checkpointRound, serializedPrevBooster, evalSetsMap)
+            }.setName(s"Trained booster after $checkpointRound rounds")
             val sparkJobThread = new Thread() {
               override def run() {
                 // force the job
@@ -459,8 +468,8 @@ object XGBoost extends Serializable {
             val (booster, metrics) = postTrackerReturnProcessing(trackerReturnVal,
               boostersAndMetrics, sparkJobThread)
             if (checkpointRound < round) {
-              prevBooster = booster
-              checkpointManager.updateCheckpoint(prevBooster)
+              checkpointManager.updateCheckpoint(booster)
+              serializedPrevBooster = SerializedBooster(booster.toByteArray, booster.getVersion)
             }
             (booster, metrics)
           } finally {

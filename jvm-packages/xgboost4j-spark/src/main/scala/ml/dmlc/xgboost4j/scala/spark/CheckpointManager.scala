@@ -18,6 +18,7 @@ package ml.dmlc.xgboost4j.scala.spark
 
 import ml.dmlc.xgboost4j.scala.Booster
 import ml.dmlc.xgboost4j.scala.{XGBoost => SXGBoost}
+import org.apache.commons.io.IOUtils
 import org.apache.commons.logging.LogFactory
 import org.apache.hadoop.fs.{FileSystem, Path}
 import org.apache.spark.SparkContext
@@ -68,6 +69,19 @@ private[spark] class CheckpointManager(sc: SparkContext, checkpointPath: String)
       val booster = SXGBoost.loadModel(inputStream)
       booster.booster.setVersion(version)
       booster
+    } else {
+      null
+    }
+  }
+
+  private[spark] def loadCheckpointAsSerializedBooster: SerializedBooster = {
+    val versions = getExistingVersions
+    if (versions.nonEmpty) {
+      val version = versions.max
+      val fullPath = getPath(version)
+      val inputStream = FileSystem.get(sc.hadoopConfiguration).open(new Path(fullPath))
+      logger.info(s"Start training from previous booster at $fullPath")
+      SerializedBooster(IOUtils.toByteArray(inputStream), version)
     } else {
       null
     }

@@ -47,7 +47,7 @@ public class Booster implements Serializable, KryoSerializable {
    *                  the prediction of these DMatrices will become faster than not-cached data.
    * @throws XGBoostError native error
    */
-  Booster(Map<String, Object> params, DMatrix[] cacheMats) throws XGBoostError {
+  public Booster(Map<String, Object> params, DMatrix[] cacheMats) throws XGBoostError {
     init(cacheMats);
     setParam("seed", "0");
     setParams(params);
@@ -88,6 +88,12 @@ public class Booster implements Serializable, KryoSerializable {
     in.close();
     Booster ret = new Booster(new HashMap<String, Object>(), new DMatrix[0]);
     XGBoostJNI.checkCall(XGBoostJNI.XGBoosterLoadModelFromBuffer(ret.handle,os.toByteArray()));
+    return ret;
+  }
+
+  static Booster loadModel(byte[] bytes, DMatrix[] cacheMats) throws XGBoostError {
+    Booster ret = new Booster(new HashMap<String, Object>(), cacheMats);
+    XGBoostJNI.checkCall(XGBoostJNI.XGBoosterLoadModelFromBuffer(ret.handle, bytes));
     return ret;
   }
 
@@ -646,6 +652,10 @@ public class Booster implements Serializable, KryoSerializable {
     byte[][] bytes = new byte[1][];
     XGBoostJNI.checkCall(XGBoostJNI.XGBoosterGetModelRaw(this.handle, bytes));
     return bytes[0];
+  }
+
+  public void loadFromByteArray(byte[] bytes) throws XGBoostError {
+    XGBoostJNI.checkCall(XGBoostJNI.XGBoosterLoadModelFromBuffer(this.handle, bytes));
   }
 
   /**

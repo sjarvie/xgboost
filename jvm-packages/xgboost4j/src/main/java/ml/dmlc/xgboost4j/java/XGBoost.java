@@ -15,6 +15,7 @@
  */
 package ml.dmlc.xgboost4j.java;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
@@ -55,6 +56,13 @@ public class XGBoost {
   public static Booster loadModel(InputStream in)
           throws XGBoostError, IOException {
     return Booster.loadModel(in);
+  }
+
+  public static Booster loadModel(byte[] bytes, DMatrix[] cacheMats, int version)
+      throws XGBoostError {
+    Booster result = Booster.loadModel(bytes, cacheMats);
+    result.setVersion(version);
+    return result;
   }
 
   /**

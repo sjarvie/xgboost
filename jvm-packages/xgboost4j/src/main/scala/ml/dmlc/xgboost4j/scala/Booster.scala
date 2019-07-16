@@ -29,7 +29,7 @@ import scala.collection.mutable
   * DEVELOPER WARNING: A Java Booster must not be shared by more than one Scala Booster
   * @param booster the java booster object.
   */
-class Booster private[xgboost4j](private[xgboost4j] var booster: JBooster)
+class Booster(private[xgboost4j] var booster: JBooster)
   extends Serializable  with KryoSerializable {
 
   /**

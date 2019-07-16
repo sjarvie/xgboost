@@ -125,4 +125,9 @@ object XGBoost {
     val xgboostInJava = JXGBoost.loadModel(in)
     new Booster(xgboostInJava)
   }
+
+  def loadModel(bytes: Array[Byte], allMats: Array[DMatrix], version: Int): Booster = {
+    val xgboostInJava = JXGBoost.loadModel(bytes, allMats.map{_.jDMatrix}, version)
+    new Booster(xgboostInJava)
+  }
 }
