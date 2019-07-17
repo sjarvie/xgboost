@@ -458,6 +458,7 @@ object XGBoost extends Serializable {
             val sparkJobThread = new Thread() {
               override def run() {
                 // force the job
+                sc.setJobDescription(s"Train a booster to $checkpointRound")
                 boostersAndMetrics.foreachPartition(() => _)
               }
             }
@@ -576,7 +577,9 @@ object XGBoost extends Serializable {
       // it's safe to block here forever, as the tracker has returned successfully, and the Spark
       // job should have finished, there is no reason for the thread cannot return
       sparkJobThread.join()
+      distributedBoostersAndMetrics.sparkContext.setJobDescription("Fetch the trained booster")
       val (booster, metrics) = distributedBoostersAndMetrics.first()
+      distributedBoostersAndMetrics.sparkContext.setJobDescription("")
       distributedBoostersAndMetrics.unpersist(false)
       (booster, metrics)
     } else {
