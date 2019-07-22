@@ -1,0 +1,57 @@
+{
+  "configurations": [
+    {
+      "name": "x64-Debug",
+      "generator": "Ninja",
+      "configurationType": "Debug",
+      "inheritEnvironments": [
+        "msvc_x64_x64"
+      ],
+      "buildRoot": "${env.USERPROFILE}\\CMakeBuilds\\${workspaceHash}\\build\\${name}",
+      "installRoot": "${env.USERPROFILE}\\CMakeBuilds\\${workspaceHash}\\install\\${name}",
+      "variables": [
+        {
+          "name": "GOOGLE_TEST",
+          "value": "ON"
+        },
+        {
+          "name": "USE_DMLC_GTEST",
+          "value": "ON"
+        }
+      ],
+      "cmakeCommandArgs": "",
+      "buildCommandArgs": "-v",
+      "ctestCommandArgs": "-V"
+    },
+    {
+      "name": "Linux-Debug",
+      "generator": "Unix Makefiles",
+      "configurationType": "Debug",
+      "cmakeExecutable": "/usr/bin/cmake",
+      "inheritEnvironments": [
+        "linux_x64"
+      ],
+      "buildRoot": "${env.USERPROFILE}\\CMakeBuilds\\${workspaceHash}\\build\\${name}",
+      "installRoot": "${env.USERPROFILE}\\CMakeBuilds\\${workspaceHash}\\install\\${name}",
+      "variables": [
+        {
+          "name": "GOOGLE_TEST",
+          "value": "ON"
+        },
+        {
+          "name": "USE_DMLC_GTEST",
+          "value": "ON"
+        }
+      ],
+      "remoteMachineName": "${defaultRemoteMachineName}",
+      "remoteCMakeListsRoot": "/var/tmp/src/${workspaceHash}/${name}",
+      "remoteBuildRoot": "/var/tmp/build/${workspaceHash}/build/${name}",
+      "remoteCopySources": true,
+      "remoteCopySourcesOutputVerbosity": "Normal",
+      "remoteCopySourcesConcurrentCopies": "10",
+      "cmakeCommandArgs": "",
+      "buildCommandArgs": "-v",
+      "ctestCommandArgs": "-V"
+    }
+  ]
+}

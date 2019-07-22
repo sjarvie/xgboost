@@ -99,3 +99,9 @@ R-package/src/Makevars
 
 # Python install
 python-package/xgboost/tracker.py
+
+# Vagrant
+.vagrant
+
+# Windows dev tools
+.vs
