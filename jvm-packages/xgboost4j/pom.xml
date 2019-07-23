@@ -6,10 +6,10 @@
     <parent>
         <groupId>ml.dmlc</groupId>
         <artifactId>xgboost-jvm</artifactId>
-        <version>0.91.0</version>
+        <version>0.91.0-criteo-20190723-af65412_2.11</version>
     </parent>
     <artifactId>xgboost4j</artifactId>
-    <version>0.91.0</version>
+    <version>0.91.0-criteo-20190723-af65412_2.11</version>
     <packaging>jar</packaging>
 
     <dependencies>
@@ -51,7 +51,6 @@
                   <skipAssembly>false</skipAssembly>
               </configuration>
           </plugin>
-<!--
           <plugin>
               <artifactId>exec-maven-plugin</artifactId>
               <groupId>org.codehaus.mojo</groupId>
@@ -72,7 +71,6 @@
                   </execution>
               </executions>
           </plugin>
--->
           <plugin>
               <groupId>org.apache.maven.plugins</groupId>
               <artifactId>maven-jar-plugin</artifactId>
