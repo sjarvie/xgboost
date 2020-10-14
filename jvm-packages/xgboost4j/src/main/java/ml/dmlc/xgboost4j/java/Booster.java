@@ -47,7 +47,7 @@ public class Booster implements Serializable, KryoSerializable {
    *                  the prediction of these DMatrices will become faster than not-cached data.
    * @throws XGBoostError native error
    */
-  Booster(Map<String, Object> params, DMatrix[] cacheMats) throws XGBoostError {
+  public Booster(Map<String, Object> params, DMatrix[] cacheMats) throws XGBoostError {
     init(cacheMats);
     setParams(params);
   }
@@ -58,7 +58,7 @@ public class Booster implements Serializable, KryoSerializable {
    * @return The created Booster.
    * @throws XGBoostError
    */
-  static Booster loadModel(String modelPath) throws XGBoostError {
+  public static Booster loadModel(String modelPath) throws XGBoostError {
     if (modelPath == null) {
       throw new NullPointerException("modelPath : null");
     }
@@ -77,7 +77,7 @@ public class Booster implements Serializable, KryoSerializable {
    * @throws XGBoostError
    * @throws IOException
    */
-  static Booster loadModel(InputStream in) throws XGBoostError, IOException {
+  public static Booster loadModel(InputStream in) throws XGBoostError, IOException {
     int size;
     byte[] buf = new byte[1<<20];
     ByteArrayOutputStream os = new ByteArrayOutputStream();
@@ -660,7 +660,7 @@ public class Booster implements Serializable, KryoSerializable {
    * @return the stored version number of the checkpoint.
    * @throws XGBoostError
    */
-  int loadRabitCheckpoint() throws XGBoostError {
+  public int loadRabitCheckpoint() throws XGBoostError {
     int[] out = new int[1];
     XGBoostJNI.checkCall(XGBoostJNI.XGBoosterLoadRabitCheckpoint(this.handle, out));
     version = out[0];
@@ -672,13 +672,12 @@ public class Booster implements Serializable, KryoSerializable {
    * This is only used in distributed training.
    * @throws XGBoostError
    */
-  void saveRabitCheckpoint() throws XGBoostError {
+  public void saveRabitCheckpoint() throws XGBoostError {
     XGBoostJNI.checkCall(XGBoostJNI.XGBoosterSaveRabitCheckpoint(this.handle));
     version += 1;
   }
 
-  /**
-   * Internal initialization function.
+  /** Internal initialization function.
    * @param cacheMats The cached DMatrix.
    * @throws XGBoostError
    */
